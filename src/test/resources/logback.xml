@@ -1,0 +1,134 @@
+<!DOCTYPE logback>
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                <![CDATA[date:%d{yyyy-MM-dd HH:mm:ss}\tthread:%thread\tX-Track:%X{X-Track}\tlevel:%-5level\tlogger:%-48logger{48}\tmessage:%msg%n]]>
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="APPLICATION_LOG_FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>
+            log/jpa-examples-application.log
+        </file>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                log/jpa-examples-application-%d{yyyyMMdd}.log
+            </fileNamePattern>
+            <maxHistory>
+                7
+            </maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>
+                UTF-8
+            </charset>
+            <pattern>
+                <![CDATA[date:%d{yyyy-MM-dd HH:mm:ss}\tthread:%thread\tX-Track:%X{X-Track}\tlevel:%-5level\tlogger:%-48logger{48}\tmessage:%msg%n]]>
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="MONITORING_LOG_FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>log/jpa-examples-monitoring.log</file>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                log/jpa-examples-monitoring-%d{yyyyMMdd}.log
+            </fileNamePattern>
+            <maxHistory>
+                7
+            </maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>
+                UTF-8
+            </charset>
+            <pattern>
+                <![CDATA[date:%d{yyyy-MM-dd HH:mm:ss}\tX-Track:%X{X-Track}\tlevel:%-5level\tmessage:%msg%n]]>
+            </pattern>
+        </encoder>
+    </appender>
+
+
+    <appender name="DB" class="ch.qos.logback.classic.db.DBAppender">
+        <connectionSource
+                class="ch.qos.logback.core.db.DataSourceConnectionSource">
+            <dataSource class="org.apache.commons.dbcp2.BasicDataSource">
+                <driverClassName>
+                    org.h2.Driver
+                </driverClassName>
+                <url>
+                    jdbc:h2:mem:jpa-examples;DB_CLOSE_DELAY=-1;MVCC=TRUE;LOCK_TIMEOUT=0;INIT=RUNSCRIPT
+                    FROM 'classpath:logback-H2-ddl.sql'
+                </url>
+                <username>
+                    sa
+                </username>
+                <password/>
+            </dataSource>
+        </connectionSource>
+    </appender>
+
+    <!-- Application Loggers -->
+    <logger name="com.example">
+        <level value="debug"/>
+    </logger>
+
+    <!-- TERASOLUNA -->
+    <logger name="org.terasoluna.gfw">
+        <level value="debug"/>
+    </logger>
+    <logger name="org.terasoluna.gfw.web.logging.TraceLoggingInterceptor">
+        <level value="trace"/>
+    </logger>
+    <logger name="org.terasoluna.gfw.common.exception.ExceptionLogger">
+        <level value="info"/>
+    </logger>
+    <logger name="org.terasoluna.gfw.common.exception.ExceptionLogger.Monitoring"
+            additivity="false">
+        <level value="error"/>
+        <appender-ref ref="MONITORING_LOG_FILE"/>
+    </logger>
+
+    <!-- 3rdparty Loggers -->
+    <logger name="org.springframework">
+        <level value="warn"/>
+    </logger>
+
+    <logger name="org.springframework.web.servlet">
+        <level value="info"/>
+    </logger>
+
+    <logger name="org.hibernate.engine.transaction">
+        <level value="debug"/>
+    </logger>
+
+    <logger name="org.springframework.orm.jpa.JpaTransactionManager">
+        <level value="debug"/>
+    </logger>
+
+    <logger name="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <level value="debug"/>
+    </logger>
+
+    <logger name="jdbc.sqltiming">
+        <level value="debug"/>
+    </logger>
+
+    <logger name="jdbc.resultsettable">
+        <level value="debug"/>
+    </logger>
+
+    <root level="warn">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="APPLICATION_LOG_FILE"/>
+        <appender-ref ref="DB"/>
+    </root>
+
+</configuration>

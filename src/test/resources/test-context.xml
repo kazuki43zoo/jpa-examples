@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+       ">
+
+    <import resource="classpath:META-INF/spring/applicationContext.xml"/>
+
+    <jdbc:initialize-database data-source="dataSource">
+        <jdbc:script location="database/${database}-schema.sql"/>
+        <jdbc:script location="database/${database}-loaddata.sql"/>
+    </jdbc:initialize-database>
+
+    <bean id="realDataSourceForLogging"
+          class="org.apache.commons.dbcp2.BasicDataSource"
+          destroy-method="close">
+        <property name="driverClassName"
+                  value="${H2.database.driverClassName}"/>
+        <property name="url" value="${H2.database.url}"/>
+        <property name="username" value="${H2.database.username}"/>
+        <property name="password" value="${H2.database.password}"/>
+        <property name="defaultAutoCommit" value="true"/>
+    </bean>
+
+    <bean id="jdbcTemplate"
+          class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+
+    <bean id="jdbcTemplateForLogging"
+          class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+        <constructor-arg ref="realDataSourceForLogging"/>
+    </bean>
+
+</beans>
